@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WindowResizer"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="Window Resizer" Height="100" Width="300">
+        Title="Window Resizer" Height="200" Width="300">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -15,11 +15,22 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Grid>
+    <Grid
+        Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Button
+            x:Name="ToggleBtn"
+            Margin="10"
+            Width="200"
+            Content="Turn Off"
+            Click="Toggle_Click" />
+
+        <Button
+            Grid.Row="1"
+            Margin="10"
             Width="200"
             Content="Minimize to System Tray"
             Click="MinimizeToTray_Click" />

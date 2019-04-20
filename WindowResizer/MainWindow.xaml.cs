@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -44,11 +43,11 @@ namespace WindowResizer
         /// </summary>
         /// <returns></returns>
         [DllImport("user32.dll", SetLastError = true)]
-        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetWindowRect(IntPtr hWnd, out SystemRect rect);
+        private static extern bool GetWindowRect(IntPtr hWnd, out SystemRect rect);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
@@ -73,10 +72,13 @@ namespace WindowResizer
         public event EventHandler<KeyPressedEventArgs> OnKeyPressed;
         private LowLevelKeyboardProc _proc;
         private IntPtr _hookID = IntPtr.Zero;
+        private bool _isToggled;
+        private ScreenCalculator _screenCalculator;
 
         public MainWindow()
         {
             InitializeComponent();
+            _screenCalculator = new ScreenCalculator();
             _proc = HookCallback;
 
             taskbarNotification = new Hardcodet.Wpf.TaskbarNotification.TaskbarIcon();
@@ -89,55 +91,70 @@ namespace WindowResizer
 
         private void foo_OnKeyPressed(object sender, KeyPressedEventArgs e)
         {
-            if (e.KeyPressed == Key.C)
+            if (e.KeyPressed == Key.F7)
             {
                 MoveToCenter();
             }
+            else if (e.KeyPressed == Key.F8)
+            {
+                MoveToCenterWithGaps();
+            }
         }
 
+        private void MoveToCenterWithGaps()
+        {
+            IntPtr active = GetForegroundWindow();
+
+            var screenWidth = (int)SystemParameters.WorkArea.Width;
+            var screenHeight = (int)SystemParameters.WorkArea.Height;
+
+            double percentage = 0.95;
+
+            SystemRect rect = _screenCalculator.ChangeWindowSize(screenWidth, screenHeight, percentage);
+
+            var windowWidth = _screenCalculator.ComputeForWindowLength(rect.Right, rect.Left);
+            var windowHeight = _screenCalculator.ComputeForWindowLength(rect.Bottom, rect.Top);
+
+            int x = _screenCalculator.ComputeForX(screenWidth, rect);
+            int y = _screenCalculator.ComputeForY(screenHeight, rect);
+            
+            SetWindowPos(active, (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
+        }
+
+        /// <summary>
+        ///     The computation should be:
+        ///     ((screenSizeX - windowSizeX) / 2)
+        ///     ((screenSizeY - windowSizeY) / 2)
+        /// </summary>
         private void MoveToCenter()
         {
             IntPtr active = GetForegroundWindow();
-            System.Diagnostics.Debug.WriteLine(active);
 
-            var screenWidth = SystemParameters.WorkArea.Width;
-            var screenHeight = SystemParameters.WorkArea.Height;
+            var screenWidth = (int)SystemParameters.WorkArea.Width;
+            var screenHeight = (int)SystemParameters.WorkArea.Height;
 
-            var foobar = GetWindowRect(active, out SystemRect rect);
+            GetWindowRect(active, out SystemRect rect);
 
-            var windowWidth = rect.Right - rect.Left;
-            var windowHeight = rect.Bottom - rect.Top;
+            var windowWidth = _screenCalculator.ComputeForWindowLength(rect.Right, rect.Left);
+            var windowHeight = _screenCalculator.ComputeForWindowLength(rect.Bottom, rect.Top);
 
-            int x = computeToCurrentMonitor(screenWidth, rect.Right, rect.Left);
-            int y = computeToCurrentMonitor(screenHeight, rect.Bottom, rect.Top); 
+            int x = _screenCalculator.ComputeForX(screenWidth, rect);
+            int y = _screenCalculator.ComputeForY(screenHeight, rect);
             
-            bool bar = SetWindowPos(active, (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
+            SetWindowPos(active, (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
         }
 
-        private int computeToCurrentMonitor(double dblCurrentScreenWidth, int windowFromRight, int windowFromLeft)
+        private int computeToCurrentMonitor(double dblCurrentScreenWidth, int windowFromOuter, int windowFromInner)
         {
             int currentScreenWidth = (int)dblCurrentScreenWidth;
 
-            // This means that the window is at the primary monitor.ccccc
-            if (windowFromRight < currentScreenWidth)
-            {
-                return (windowFromRight - windowFromLeft) / 2;
-            }
-
-            return ((windowFromRight - windowFromLeft) / 2) + currentScreenWidth;
-        }
-
-        private int computeToCurrentMonitor2(double dblCurrentScreenWidth, int windowFromOuter, int windowFromInner)
-        {
-            int currentScreenWidth = (int)dblCurrentScreenWidth;
-
-            // This means that the window is at the primary monitor.ccccc
+            // This means that the window is at the primary monitor.
             if (windowFromOuter < currentScreenWidth)
             {
-                return (windowFromOuter - windowFromInner) / 2;
+                return (currentScreenWidth - (windowFromOuter - windowFromInner)) / 2;
             }
 
-            return ((windowFromOuter - windowFromInner) / 2) + currentScreenWidth;
+            return ((currentScreenWidth - (windowFromOuter - windowFromInner)) / 2) + currentScreenWidth;
         }
 
         public void HookKeyboard()
@@ -153,9 +170,11 @@ namespace WindowResizer
         private IntPtr SetHook(LowLevelKeyboardProc proc)
         {
             using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
             {
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
+                using (ProcessModule curModule = curProcess.MainModule)
+                {
+                    return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
+                }
             }
         }
 
@@ -171,6 +190,22 @@ namespace WindowResizer
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
 
+        private void Toggle_Click(object sender, RoutedEventArgs e)
+        {
+            _isToggled = !_isToggled;
+
+            if (_isToggled)
+            {
+                HookKeyboard();
+            }
+            else
+            {
+                UnHookKeyboard();
+            }
+
+            System.Diagnostics.Debug.WriteLine(_isToggled);
+        }
+
         #endregion
 
         #region Hide to System Tray
@@ -179,6 +214,7 @@ namespace WindowResizer
 
         private void MinimizeToTray_Click(object sender, RoutedEventArgs e)
         {
+            Hide();
             WindowState = WindowState.Minimized;
             taskbarNotification = (Hardcodet.Wpf.TaskbarNotification.TaskbarIcon)FindResource("MyNotifyIcon");
 
