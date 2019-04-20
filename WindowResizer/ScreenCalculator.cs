@@ -28,14 +28,14 @@ namespace WindowResizer
             return windowOuter - windowInner;
         }
 
-        public SystemRect ChangeWindowSize(int screenWidth, int screenHeight, double percentage)
+        public SystemRect ChangeWindowSize(int screenWidth, int screenHeight, double percentageWidth, double percentageHeight)
         {
             return new SystemRect
             {
                 Left = 0,
                 Top = 0,
-                Right = (int)(screenWidth * percentage),
-                Bottom = (int)(screenHeight * percentage)
+                Right = (int)(screenWidth * percentageWidth),
+                Bottom = (int)(screenHeight * percentageHeight)
             };
         }
     }

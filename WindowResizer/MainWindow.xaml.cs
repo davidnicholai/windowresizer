@@ -103,22 +103,21 @@ namespace WindowResizer
 
         private void MoveToCenterWithGaps()
         {
-            IntPtr active = GetForegroundWindow();
-
             var screenWidth = (int)SystemParameters.WorkArea.Width;
             var screenHeight = (int)SystemParameters.WorkArea.Height;
 
-            double percentage = 0.95;
+            if (double.TryParse(PercentageBox.Text, out double result))
+            {
+                SystemRect rect = _screenCalculator.ChangeWindowSize(screenWidth, screenHeight, result, result);
 
-            SystemRect rect = _screenCalculator.ChangeWindowSize(screenWidth, screenHeight, percentage);
+                var windowWidth = _screenCalculator.ComputeForWindowLength(rect.Right, rect.Left);
+                var windowHeight = _screenCalculator.ComputeForWindowLength(rect.Bottom, rect.Top);
 
-            var windowWidth = _screenCalculator.ComputeForWindowLength(rect.Right, rect.Left);
-            var windowHeight = _screenCalculator.ComputeForWindowLength(rect.Bottom, rect.Top);
+                int x = _screenCalculator.ComputeForX(screenWidth, rect);
+                int y = _screenCalculator.ComputeForY(screenHeight, rect);
 
-            int x = _screenCalculator.ComputeForX(screenWidth, rect);
-            int y = _screenCalculator.ComputeForY(screenHeight, rect);
-            
-            SetWindowPos(active, (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
+                SetWindowPos(GetForegroundWindow(), (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
+            }
         }
 
         /// <summary>
