@@ -55,6 +55,13 @@
     <Compile Include="Hotkeys\KeyModifier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScreenCalculator.cs" />
+    <Compile Include="SetWindowPosFlags.cs" />
+    <Compile Include="SpecialWindowHandles.cs" />
+    <Compile Include="SystemRect.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -76,12 +83,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WindowResizerShared\WindowResizerShared.csproj">
-      <Project>{021f79eb-de2d-463a-97d8-214d0c40fe11}</Project>
-      <Name>WindowResizerShared</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NOTES.ICO">

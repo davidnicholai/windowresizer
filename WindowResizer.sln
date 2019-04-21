@@ -3,13 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowResizer", "WindowResizer\WindowResizer.csproj", "{3E39ABC4-5FA1-407E-923F-6A81CD51EE89}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowResizer.Tests", "WindowResizer.Tests\WindowResizer.Tests.csproj", "{0C505704-07FB-41CB-8668-3492C8385672}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowResizerForms", "WindowResizerForms\WindowResizerForms.csproj", "{2F8F78BB-E0D8-4562-8C8A-F821D2038153}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowResizerShared", "WindowResizerShared\WindowResizerShared.csproj", "{021F79EB-DE2D-463A-97D8-214D0C40FE11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3E39ABC4-5FA1-407E-923F-6A81CD51EE89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E39ABC4-5FA1-407E-923F-6A81CD51EE89}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E39ABC4-5FA1-407E-923F-6A81CD51EE89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E39ABC4-5FA1-407E-923F-6A81CD51EE89}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0C505704-07FB-41CB-8668-3492C8385672}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0C505704-07FB-41CB-8668-3492C8385672}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C505704-07FB-41CB-8668-3492C8385672}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -29,10 +21,6 @@ Global
 		{2F8F78BB-E0D8-4562-8C8A-F821D2038153}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F8F78BB-E0D8-4562-8C8A-F821D2038153}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F8F78BB-E0D8-4562-8C8A-F821D2038153}.Release|Any CPU.Build.0 = Release|Any CPU
-		{021F79EB-DE2D-463A-97D8-214D0C40FE11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{021F79EB-DE2D-463A-97D8-214D0C40FE11}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{021F79EB-DE2D-463A-97D8-214D0C40FE11}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{021F79EB-DE2D-463A-97D8-214D0C40FE11}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
