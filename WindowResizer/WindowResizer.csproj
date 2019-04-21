@@ -88,10 +88,6 @@
     </ApplicationDefinition>
     <Compile Include="KeyPressedEventArgs.cs" />
     <Compile Include="MyCommand.cs" />
-    <Compile Include="ScreenCalculator.cs" />
-    <Compile Include="SetWindowPosFlags.cs" />
-    <Compile Include="SpecialWindowHandles.cs" />
-    <Compile Include="SystemRect.cs" />
     <Resource Include="AppResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -151,6 +147,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WindowResizerShared\WindowResizerShared.csproj">
+      <Project>{021F79EB-DE2D-463A-97D8-214D0C40FE11}</Project>
+      <Name>WindowResizerShared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

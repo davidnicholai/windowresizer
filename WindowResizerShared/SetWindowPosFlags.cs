@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WindowResizer
+namespace WindowResizerShared
 {
     [Flags]
     public enum SetWindowPosFlags : uint

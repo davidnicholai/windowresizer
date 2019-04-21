@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using WindowResizerShared;
 
 namespace WindowResizer.Tests
 {
@@ -24,7 +25,7 @@ namespace WindowResizer.Tests
                 Bottom = 400,
             };
 
-            int x = _screenCalculator.ComputeForX(1920, rect);
+            int x = _screenCalculator.ComputeForX(1920, rect, 0);
 
             Assert.AreEqual(x, 560);
         }
@@ -40,7 +41,7 @@ namespace WindowResizer.Tests
                 Bottom = 400,
             };
 
-            int y = _screenCalculator.ComputeForY(1040, rect);
+            int y = _screenCalculator.ComputeForY(1040, rect, 0);
 
             Assert.AreEqual(y, 320);
         }

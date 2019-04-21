@@ -56,6 +56,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\WindowResizerShared\WindowResizerShared.csproj">
+      <Project>{021F79EB-DE2D-463A-97D8-214D0C40FE11}</Project>
+      <Name>WindowResizerShared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WindowResizer\WindowResizer.csproj">
       <Project>{3e39abc4-5fa1-407e-923f-6a81cd51ee89}</Project>
       <Name>WindowResizer</Name>

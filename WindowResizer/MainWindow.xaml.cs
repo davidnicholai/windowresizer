@@ -17,6 +17,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using System.Threading;
 using WindowResizer.Properties;
+using WindowResizerShared;
+using static WindowResizerShared.ExternalInteropMethods;
 
 namespace WindowResizer
 {
@@ -25,45 +27,6 @@ namespace WindowResizer
     /// </summary>
     public partial class MainWindow : Window
     {
-        #region PInvoke Declarations
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetActiveWindow();
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindowThreadProcessId();
-
-        /// <summary>
-        /// SetWindowsPos(IntPtr handle, IntPtr handleWindowInsertAfter (optional), int x, int y, int width, int height, uint uFlags)
-        /// For uFlags, you can just use 0x0004 for SWP_NOZORDER
-        /// http://www.pinvoke.net/default.aspx/user32.SetWindowPos
-        /// </summary>
-        /// <returns></returns>
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetWindowRect(IntPtr hWnd, out SystemRect rect);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        #endregion
-
         private const int WH_KEYBOARD_LL = 13;
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_SYSKEYDOWN = 0x0104;
@@ -75,6 +38,46 @@ namespace WindowResizer
         private bool _isToggled;
         private ScreenCalculator _screenCalculator;
 
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetActiveWindow();
+
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetWindowThreadProcessId();
+
+        /// <summary>
+        /// SetWindowsPos(IntPtr handle, IntPtr handleWindowInsertAfter (optional), int x, int y, int width, int height, uint uFlags)
+        /// For uFlags, you can just use 0x0004 for SWP_NOZORDER
+        /// http://www.pinvoke.net/default.aspx/user32.SetWindowPos
+        /// </summary>
+        /// <returns></returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetWindowRect(IntPtr hWnd, out SystemRect rect);
+
+         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        [DllImport("user32.dll")]
+        internal static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
+
+        [DllImport("user32.dll")]
+        internal static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         public MainWindow()
         {
             InitializeComponent();
@@ -106,15 +109,19 @@ namespace WindowResizer
             var screenWidth = (int)SystemParameters.WorkArea.Width;
             var screenHeight = (int)SystemParameters.WorkArea.Height;
 
-            if (double.TryParse(PercentageBox.Text, out double result))
+            string percentageText = string.IsNullOrEmpty(PercentageBox.Text) ? "0.95" : PercentageBox.Text;
+
+            if (double.TryParse(percentageText, out double result))
             {
                 SystemRect rect = _screenCalculator.ChangeWindowSize(screenWidth, screenHeight, result, result);
 
                 var windowWidth = _screenCalculator.ComputeForWindowLength(rect.Right, rect.Left);
                 var windowHeight = _screenCalculator.ComputeForWindowLength(rect.Bottom, rect.Top);
 
-                int x = _screenCalculator.ComputeForX(screenWidth, rect);
-                int y = _screenCalculator.ComputeForY(screenHeight, rect);
+                int x = _screenCalculator.ComputeForX(screenWidth, rect, 0);
+                int y = _screenCalculator.ComputeForY(screenHeight, rect, 0);
+
+                System.Diagnostics.Debug.WriteLine($"x: {x} / y: {y} / windowWidth: {windowWidth} / windowHeight: {windowHeight}");
 
                 SetWindowPos(GetForegroundWindow(), (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
             }
@@ -137,9 +144,11 @@ namespace WindowResizer
             var windowWidth = _screenCalculator.ComputeForWindowLength(rect.Right, rect.Left);
             var windowHeight = _screenCalculator.ComputeForWindowLength(rect.Bottom, rect.Top);
 
-            int x = _screenCalculator.ComputeForX(screenWidth, rect);
-            int y = _screenCalculator.ComputeForY(screenHeight, rect);
+            int x = _screenCalculator.ComputeForX(screenWidth, rect, 0);
+            int y = _screenCalculator.ComputeForY(screenHeight, rect, 0);
             
+            System.Diagnostics.Debug.WriteLine($"x: {x} / y: {y} / windowWidth: {windowWidth} / windowHeight: {windowHeight}");
+
             SetWindowPos(active, (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
         }
 

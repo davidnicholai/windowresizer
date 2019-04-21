@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WindowResizer
+namespace WindowResizerShared
 {
     public class ScreenCalculator
     {
@@ -13,14 +13,14 @@ namespace WindowResizer
 
         }
 
-        public int ComputeForX(int screenWidth, SystemRect systemRect)
+        public int ComputeForX(int screenWidth, SystemRect systemRect, int xPos)
         {
-            return (screenWidth - ComputeForWindowLength(systemRect.Right, systemRect.Left)) / 2;
+            return xPos + ((screenWidth - ComputeForWindowLength(systemRect.Right, systemRect.Left)) / 2);
         }
 
-        public int ComputeForY(int screenHeight, SystemRect systemRect)
+        public int ComputeForY(int screenHeight, SystemRect systemRect, int yPos)
         {
-            return (screenHeight - ComputeForWindowLength(systemRect.Bottom, systemRect.Top)) / 2;
+            return yPos + ((screenHeight - ComputeForWindowLength(systemRect.Bottom, systemRect.Top)) / 2);
         }
 
         public int ComputeForWindowLength(int windowOuter, int windowInner)

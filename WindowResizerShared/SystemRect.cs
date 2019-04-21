@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WindowResizer
+namespace WindowResizerShared
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct SystemRect
