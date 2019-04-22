@@ -17,6 +17,8 @@ namespace WindowResizerForms
             _screenCalculator = new ScreenCalculator();
 
             RegisterHotkeys();
+
+            FormClosing += Form1_FormClosing;
         }
 
         public Rectangle GetMonitorNumber(Rectangle rectangle)
@@ -60,6 +62,19 @@ namespace WindowResizerForms
             System.Diagnostics.Debug.WriteLine($"x: {x} / y: {y} / windowWidth: {windowWidth} / windowHeight: {windowHeight}");
 
             SetWindowPos(activeWindow, (IntPtr)SpecialWindowHandles.HWND_TOP, x, y, windowWidth, windowHeight, SetWindowPosFlags.SWP_SHOWWINDOW);
+        }
+
+        private void FocusMode()
+        {
+            IntPtr activeWindow = GetForegroundWindow();
+
+            // Hide all windows
+            IntPtr lHwnd = FindWindow("Shell_TrayWnd", null);
+            SendMessage(lHwnd, WM_COMMAND, (IntPtr) MIN_ALL, IntPtr.Zero);
+
+            System.Threading.Thread.Sleep(500);
+
+            ShowWindowAsync(activeWindow, (int) ShowWindowEnum.SHOWNORMAL);
         }
 
         private void MoveToCenterWithGaps()
@@ -125,6 +140,10 @@ namespace WindowResizerForms
             {
                 MinimizeToSystemTray();
             }
+            else if (keyModifier == KeyModifier.Alt && key == Keys.F)
+            {
+                FocusMode();
+            }
         }
 
         private void RegisterHotkeys()
@@ -133,6 +152,7 @@ namespace WindowResizerForms
             RegisterHotKey(Handle, 1, (int)KeyModifier.Alt, Keys.V.GetHashCode());
             RegisterHotKey(Handle, 2, (int)KeyModifier.Alt, Keys.G.GetHashCode());
             RegisterHotKey(Handle, 3, (int)KeyModifier.Alt, Keys.M.GetHashCode());
+            RegisterHotKey(Handle, 4, (int)KeyModifier.Alt, Keys.F.GetHashCode());
         }
 
         private void UnregisterHotkeys()
@@ -141,6 +161,7 @@ namespace WindowResizerForms
             UnregisterHotKey(Handle, 1);
             UnregisterHotKey(Handle, 2);
             UnregisterHotKey(Handle, 3);
+            UnregisterHotKey(Handle, 4);
         }
 
         private void MinimizeToSystemTray()
@@ -159,6 +180,11 @@ namespace WindowResizerForms
             Hide();
 
             notifyIcon.DoubleClick += new System.EventHandler(NotifyIcon_DoubleClick);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            UnregisterHotkeys();
         }
 
         private void NotifyIcon_DoubleClick(object sender, EventArgs e)
@@ -196,6 +222,19 @@ namespace WindowResizerForms
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+        [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll", EntryPoint = "SendMessage", SetLastError = true)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, Int32 Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
+        const int WM_COMMAND = 0x111;
+        const int MIN_ALL = 419;
+        const int MIN_ALL_UNDO = 416;
 
         #endregion
     }
